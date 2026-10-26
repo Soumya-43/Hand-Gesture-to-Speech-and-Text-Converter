@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gesture Output</title>
+
+<!-- Firebase Libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial, Helvetica, sans-serif;
+    background:linear-gradient(135deg,#4facfe,#00f2fe);
+}
+
+.container{
+    background:white;
+    padding:40px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+    text-align:center;
+    width:400px;
+}
+
+h1{
+    margin-bottom:10px;
+    color:#333;
+}
+
+#word{
+    font-size:40px;
+    color:#0077ff;
+    margin:20px 0;
+    font-weight:bold;
+}
+
+button{
+    padding:12px 25px;
+    font-size:16px;
+    border:none;
+    border-radius:8px;
+    background:#0077ff;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#005ad1;
+    transform:scale(1.05);
+}
+
+.status{
+    margin-top:10px;
+    color:#666;
+    font-size:14px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Detected Word</h1>
+
+<h2 id="word">Waiting...</h2>
+
+<button onclick="enableSpeech()">Enable Speech</button>
+
+<div class="status">Speech will play after enabling</div>
+
+</div>
+
+<script>
+
+var speechEnabled = false;
+var latestWord = "";
+
+function enableSpeech(){
+  speechEnabled = true;
+
+  if(latestWord !== ""){
+    speakWord(latestWord);
+  }
+}
+
+function speakWord(word){
+  var speech = new SpeechSynthesisUtterance(word);
+  speech.lang = "en-US";
+  window.speechSynthesis.speak(speech);
+}
+
+var firebaseConfig = {
+  apiKey: "FIREBASE_API",
+  databaseURL: "FIREBASE_DATABASE_URL",
+  projectId: "sign2text-1f380"
+};
+
+firebase.initializeApp(firebaseConfig);
+var database = firebase.database();
+
+database.ref("gesture/word").on("value", function(snapshot){
+  var word = snapshot.val();
+  if(word){
+    latestWord = word;
+    document.getElementById("word").innerText = word;
+
+    if(speechEnabled){
+      speakWord(word);
+    }
+  }
+});
+
+</script>
+
+</body>
+</html>
